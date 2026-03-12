@@ -5,7 +5,7 @@
       "type": "node",
       "request": "launch",
       "name": "Launch Server (attach)",
-      "program": "${workspaceFolder}/index.js",
+      "program": "${workspaceFolder}/index.js"
     }
   ]
 }

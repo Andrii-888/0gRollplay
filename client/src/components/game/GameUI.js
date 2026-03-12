@@ -1,9 +1,8 @@
-import React, { useContext } from 'react'
- 
-import Button from '../buttons/Button'
-import { BetSlider } from './Betslider/BetSlider'
-import { UIWrapper } from './UIWrapper'
-import { Row, Col } from 'react-bootstrap'
+import React from "react";
+import Button from "../buttons/Button";
+import { BetSlider } from "./Betslider/BetSlider";
+import { UIWrapper } from "./UIWrapper";
+import { Row, Col } from "react-bootstrap";
 
 export const GameUI = ({
   currentTable,
@@ -16,10 +15,8 @@ export const GameUI = ({
   check,
   call,
 }) => {
-   
-
   return (
-    <UIWrapper style={{ display: 'flex' }}>
+    <UIWrapper style={{ display: "flex" }}>
       <Row>
         <Col sm={12} md={6}>
           <Row>
@@ -28,7 +25,7 @@ export const GameUI = ({
                 small
                 secondary
                 onClick={fold}
-                style={{ minHeight: '100%' }}
+                style={{ minHeight: "100%" }}
               >
                 Fold
               </Button>
@@ -42,7 +39,7 @@ export const GameUI = ({
                   currentTable.callAmount > 0
                 }
                 onClick={check}
-                style={{ minHeight: '100%' }}
+                style={{ minHeight: "100%" }}
               >
                 Check
               </Button>
@@ -56,7 +53,7 @@ export const GameUI = ({
                 }
                 onClick={call}
               >
-                Call{' '}
+                Call{" "}
                 {/* {currentTable.callAmount &&
                 currentTable.seats[seatId].bet < currentTable.callAmount &&
                 currentTable.callAmount <= currentTable.seats[seatId].stack
@@ -72,22 +69,22 @@ export const GameUI = ({
               <Button
                 small
                 onClick={() => raise(bet + currentTable.seats[seatId].bet)}
-                style={{ minHeight: '100%' }}
+                style={{ minHeight: "100%" }}
               >
                 Raise
               </Button>
             </Col>
             <Col
-              sm={{span: 7, offset: 1}}
+              sm={{ span: 7, offset: 1 }}
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: '2px solid',
-                borderImage: 'linear-gradient(to bottom, #21a68e, #0d3733) 2',
-                backgroundImage: 'linear-gradient(to bottom, #187969, #081c1c)',
-                backgroundOrigin: 'border-box',
-                padding: '0px 5px',
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                border: "2px solid",
+                borderImage: "linear-gradient(to bottom, #21a68e, #0d3733) 2",
+                backgroundImage: "linear-gradient(to bottom, #187969, #081c1c)",
+                backgroundOrigin: "border-box",
+                padding: "0px 5px",
                 clipPath: `polygon(
     0 5px,
     5px 0,
@@ -106,7 +103,7 @@ export const GameUI = ({
                 seatId={seatId}
                 bet={bet}
                 setBet={setBet}
-                style={{ display: 'flex', alignItems: 'center' }}
+                style={{ display: "flex", alignItems: "center" }}
               />
             </Col>
           </Row>
@@ -125,5 +122,5 @@ export const GameUI = ({
         {currentTable.seats[seatId].stack})
       </Button> */}
     </UIWrapper>
-  )
-}
+  );
+};

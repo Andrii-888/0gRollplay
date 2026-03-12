@@ -1,19 +1,13 @@
-import React, { useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
-import Play from '../../pages/Play';
-import NotFoundPage from '../../pages/NotFoundPage';
-import ConnectWallet from '../../pages/ConnectWallet';
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+import Play from "../../pages/Play";
+import NotFoundPage from "../../pages/NotFoundPage";
 
 const AppRoutes = () => {
-
-  useEffect(() => {
-  }, [])
-
   return (
     <Routes>
-      <Route path="/" element={<ConnectWallet />} />
-      <Route path="/play" element={<Play />} />
-      <Route element={<NotFoundPage />} />
+      <Route path="/" element={<Play />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 };

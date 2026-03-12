@@ -1,7 +1,8 @@
-import React from 'react';
-import styled, { keyframes } from 'styled-components';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import styled, { keyframes } from "styled-components";
 
-const StyledLoadingScreen = styled.div`
+const StyledLandingPage = styled.div`
   width: 100%;
   height: 100vh;
   overflow: hidden;
@@ -33,55 +34,78 @@ const FrostedOverlay = styled.div`
   background: rgba(0, 0, 0, 0.3);
 `;
 
-const LoaderWrapper = styled.div`
+const ContentWrapper = styled.div`
   position: relative;
   z-index: 2;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  text-align: center;
 `;
 
-const spin = keyframes`
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-`;
-
-const GlowingSpinner = styled.div`
-  border: 8px solid rgba(255, 255, 255, 0.1);
-  border-top: 8px solid #00ffff;
-  border-radius: 50%;
-  width: 80px;
-  height: 80px;
-  animation: ${spin} 1.2s linear infinite;
-  box-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff66;
-`;
-
-const LoadingText = styled.div`
-  margin-top: 20px;
+const Title = styled.h1`
   color: white;
-  font-size: 18px;
-  font-weight: 500;
-  letter-spacing: 1px;
-  text-shadow: 0 0 10px #00ffff44;
+  font-size: 4rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  text-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
 `;
 
-const LoadingScreen = () => (
-  <StyledLoadingScreen>
-    <BackgroundVideo
-      autoPlay
-      muted
-      loop
-      playsInline
-      src="https://d1i6zd1p5d75mw.cloudfront.net/images/s/headervideo/1/3306010965.mp4"
-      type="video/mp4"
-    />
-    <FrostedOverlay />
-    <LoaderWrapper>
-      <GlowingSpinner />
-      <LoadingText>Loading experience...</LoadingText>
-    </LoaderWrapper>
-  </StyledLoadingScreen>
-);
+const Subtitle = styled.p`
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.2rem;
+  margin-bottom: 40px;
+  letter-spacing: 2px;
+`;
 
-export default LoadingScreen;
+const pulse = keyframes`
+  0%, 100% { box-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff66; }
+  50% { box-shadow: 0 0 30px #00ffff, 0 0 60px #00ffffaa; }
+`;
+
+const EnterButton = styled.button`
+  padding: 18px 60px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  animation: ${pulse} 2s ease-in-out infinite;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+`;
+
+const LandingPage = () => {
+  const navigate = useNavigate();
+
+  const handleEnter = () => {
+    navigate("/play");
+  };
+
+  return (
+    <StyledLandingPage>
+      <BackgroundVideo
+        autoPlay
+        muted
+        loop
+        playsInline
+        src="https://d1i6zd1p5d75mw.cloudfront.net/images/s/headervideo/1/3306010965.mp4"
+        type="video/mp4"
+      />
+      <FrostedOverlay />
+      <ContentWrapper>
+        <Title>0G Rollplay</Title>
+        <Subtitle>DECENTRALIZED POKER</Subtitle>
+        <EnterButton onClick={handleEnter}>Enter Game</EnterButton>
+      </ContentWrapper>
+    </StyledLandingPage>
+  );
+};
+
+export default LandingPage;

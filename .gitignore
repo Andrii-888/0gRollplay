@@ -6,4 +6,4 @@
 /server/public
 /server/src
 /server/test
-/server/test
+/server/test.env

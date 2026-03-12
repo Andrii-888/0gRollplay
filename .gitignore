@@ -1,9 +1,20 @@
+# Node modules
 /node_modules
 /client/node_modules
 /server/node_modules
-/server/dist
+
+# Build / Dist / Output
+/client/build
 /server/build
-/server/public
-/server/src
-/server/test
-/server/test.env
+/server/dist
+
+# Logs and system files
+nohup.out
+*.log
+
+# Env files
+server/test.env
+# .env
+
+# Optional caches
+.cache/

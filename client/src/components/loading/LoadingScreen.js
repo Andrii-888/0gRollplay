@@ -85,7 +85,7 @@ const LandingPage = () => {
   const navigate = useNavigate();
 
   const handleEnter = () => {
-    navigate("/play");
+    navigate("/wallet");
   };
 
   return (

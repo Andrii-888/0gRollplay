@@ -1,14 +1,60 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { ethers } from "ethers";
 
+const WALLET_KEY = "0g_wallet_address";
+const USERNAME_KEY = "0g_username";
+
 export const useWallet = () => {
-  const [address, setAddress] = useState(null);
+  const [address, setAddress] = useState(() =>
+    localStorage.getItem(WALLET_KEY)
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Auto-reconnect on page load if wallet was previously connected
+  useEffect(() => {
+    const savedAddress = localStorage.getItem(WALLET_KEY);
+    if (savedAddress && window.ethereum) {
+      window.ethereum
+        .request({ method: "eth_accounts" })
+        .then((accounts) => {
+          if (accounts.length > 0) {
+            setAddress(accounts[0]);
+            localStorage.setItem(WALLET_KEY, accounts[0]);
+          } else {
+            localStorage.removeItem(WALLET_KEY);
+            setAddress(null);
+          }
+        })
+        .catch(() => {
+          localStorage.removeItem(WALLET_KEY);
+          setAddress(null);
+        });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!window.ethereum) return;
+
+    const handleAccountsChanged = (accounts) => {
+      if (accounts.length === 0) {
+        localStorage.removeItem(WALLET_KEY);
+        setAddress(null);
+      } else {
+        localStorage.setItem(WALLET_KEY, accounts[0]);
+        setAddress(accounts[0]);
+      }
+    };
+
+    window.ethereum.on("accountsChanged", handleAccountsChanged);
+    return () => {
+      window.ethereum.removeListener("accountsChanged", handleAccountsChanged);
+    };
+  }, []);
+
   const connect = useCallback(async () => {
     if (!window.ethereum) {
-      setError("MetaMask not installed. Please install MetaMask.");
+      setError("MetaMask is not installed. Please install MetaMask extension.");
       return null;
     }
 
@@ -21,6 +67,7 @@ export const useWallet = () => {
 
       if (accounts.length > 0) {
         setAddress(accounts[0]);
+        localStorage.setItem(WALLET_KEY, accounts[0]);
         return accounts[0];
       }
     } catch (err) {
@@ -37,10 +84,28 @@ export const useWallet = () => {
   }, []);
 
   const disconnect = useCallback(() => {
+    localStorage.removeItem(WALLET_KEY);
+    localStorage.removeItem(USERNAME_KEY);
     setAddress(null);
   }, []);
 
-  return { address, loading, error, connect, disconnect };
+  const saveUsername = useCallback((name) => {
+    localStorage.setItem(USERNAME_KEY, name);
+  }, []);
+
+  const getSavedUsername = useCallback(() => {
+    return localStorage.getItem(USERNAME_KEY) || "";
+  }, []);
+
+  return {
+    address,
+    loading,
+    error,
+    connect,
+    disconnect,
+    saveUsername,
+    getSavedUsername,
+  };
 };
 
 export default useWallet;

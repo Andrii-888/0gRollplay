@@ -1,30 +1,61 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import globalContext from "./../../context/global/globalContext";
 import socketContext from "../../context/websocket/socketContext";
 import { CS_FETCH_LOBBY_INFO } from "../../game/actions";
 import useWallet from "../../hooks/useWallet";
 import "./ConnectWallet.scss";
 
+const USERNAME_MIN = 3;
+const USERNAME_MAX = 20;
+const USERNAME_REGEX = /^[a-zA-Z0-9_]+$/;
+
+const validateUsername = (value) => {
+  if (!value.trim()) return "Username is required";
+  if (value.trim().length < USERNAME_MIN)
+    return "Minimum " + USERNAME_MIN + " characters";
+  if (value.trim().length > USERNAME_MAX)
+    return "Maximum " + USERNAME_MAX + " characters";
+  if (!USERNAME_REGEX.test(value.trim()))
+    return "Only letters, numbers and _ allowed";
+  return null;
+};
+
 const ConnectWallet = () => {
   const { setWalletAddress } = useContext(globalContext);
   const { socket } = useContext(socketContext);
   const navigate = useNavigate();
-  const useQuery = () => new URLSearchParams(useLocation().search);
-  const query = useQuery();
+  const query = new URLSearchParams(useLocation().search);
 
-  const { address, loading, error, connect } = useWallet();
+  const {
+    address,
+    loading,
+    error,
+    connect,
+    disconnect,
+    saveUsername,
+    getSavedUsername,
+  } = useWallet();
   const [username, setUsername] = useState("");
+  const [usernameError, setUsernameError] = useState(null);
+  const [touched, setTouched] = useState(false);
 
-  // Handle URL params (existing flow)
+  const hasMetaMask = typeof window !== "undefined" && Boolean(window.ethereum);
+  const isUsernameValid = validateUsername(username) === null;
+
+  // Load saved username on mount
+  useEffect(() => {
+    const saved = getSavedUsername();
+    if (saved) setUsername(saved);
+  }, [getSavedUsername]);
+
+  // Handle URL params (external link flow)
   useEffect(() => {
     if (socket !== null && socket.connected === true) {
       const walletAddress = query.get("walletAddress");
       const gameId = query.get("gameId");
       const urlUsername = query.get("username");
       if (walletAddress && gameId && urlUsername) {
-        console.log(urlUsername);
         setWalletAddress(walletAddress);
         socket.emit(CS_FETCH_LOBBY_INFO, {
           walletAddress,
@@ -35,19 +66,79 @@ const ConnectWallet = () => {
         navigate("/play");
       }
     }
-  }, [socket, navigate, query, setWalletAddress]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [socket]);
 
-  const handleConnect = async () => {
-    const walletAddress = await connect();
-    if (walletAddress && socket && socket.connected && username.trim()) {
-      setWalletAddress(walletAddress);
+  const handleUsernameChange = (e) => {
+    const value = e.target.value;
+    if (value.length <= USERNAME_MAX + 1) setUsername(value);
+    if (touched) setUsernameError(validateUsername(value));
+  };
+
+  const handleUsernameBlur = () => {
+    setTouched(true);
+    setUsernameError(validateUsername(username));
+  };
+
+  const enterGame = (walletAddr) => {
+    saveUsername(username.trim());
+    setWalletAddress(walletAddr);
+    if (socket && socket.connected) {
       socket.emit(CS_FETCH_LOBBY_INFO, {
-        walletAddress,
+        walletAddress: walletAddr,
         socketId: socket.id,
         gameId: "1",
         username: username.trim(),
       });
       navigate("/play");
+    }
+  };
+
+  const handleConnect = async () => {
+    setTouched(true);
+    const err = validateUsername(username);
+    if (err) {
+      setUsernameError(err);
+      return;
+    }
+
+    const walletAddress = await connect();
+    if (walletAddress) {
+      enterGame(walletAddress);
+    }
+  };
+
+  const handlePlayAsGuest = () => {
+    setTouched(true);
+    const err = validateUsername(username);
+    if (err) {
+      setUsernameError(err);
+      return;
+    }
+
+    const guestAddress =
+      "0x" +
+      Array.from({ length: 40 }, () =>
+        Math.floor(Math.random() * 16).toString(16)
+      ).join("");
+    enterGame(guestAddress);
+  };
+
+  const handleDisconnect = () => {
+    disconnect();
+    setUsername("");
+    setTouched(false);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && isUsernameValid && !loading) {
+      if (address) {
+        enterGame(address);
+      } else if (hasMetaMask) {
+        handleConnect();
+      } else {
+        handlePlayAsGuest();
+      }
     }
   };
 
@@ -58,38 +149,108 @@ const ConnectWallet = () => {
 
         {!address ? (
           <>
-            <input
-              type="text"
-              placeholder="Enter your username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="connect-wallet-input"
-            />
-            <button
-              onClick={handleConnect}
-              disabled={loading || !username.trim()}
-              className="connect-wallet-button"
-            >
-              {loading ? "Connecting..." : "Connect MetaMask"}
-            </button>
+            <div className="connect-wallet-field">
+              <input
+                type="text"
+                placeholder="Enter username"
+                value={username}
+                onChange={handleUsernameChange}
+                onBlur={handleUsernameBlur}
+                onKeyDown={handleKeyDown}
+                className={
+                  "connect-wallet-input" +
+                  (touched && usernameError ? " input-error" : "") +
+                  (touched && !usernameError && username ? " input-valid" : "")
+                }
+              />
+              {touched && usernameError && (
+                <span className="field-error">{usernameError}</span>
+              )}
+              {touched && !usernameError && username && (
+                <span className="field-valid">Username is valid</span>
+              )}
+              <span className="field-hint">
+                {username.length}/{USERNAME_MAX}
+              </span>
+            </div>
+
+            {hasMetaMask ? (
+              <button
+                onClick={handleConnect}
+                disabled={loading || !isUsernameValid}
+                className="connect-wallet-button"
+              >
+                {loading ? "Connecting..." : "Connect MetaMask"}
+              </button>
+            ) : (
+              <button
+                onClick={handlePlayAsGuest}
+                disabled={!isUsernameValid}
+                className="connect-wallet-button"
+              >
+                Play as Guest
+              </button>
+            )}
+
+            {hasMetaMask && (
+              <button
+                onClick={handlePlayAsGuest}
+                disabled={!isUsernameValid}
+                className="connect-wallet-guest"
+              >
+                or Play as Guest
+              </button>
+            )}
+
+            {!hasMetaMask && (
+              <p className="connect-wallet-hint">
+                Install MetaMask to connect your wallet
+              </p>
+            )}
           </>
         ) : (
           <div className="connect-wallet-connected">
-            <p>
-              Connected: {address.slice(0, 6)}...{address.slice(-4)}
+            <p className="wallet-address-display">
+              {address.slice(0, 6)}...{address.slice(-4)}
             </p>
+            <div className="connect-wallet-field">
+              <input
+                type="text"
+                placeholder="Enter username"
+                value={username}
+                onChange={handleUsernameChange}
+                onBlur={handleUsernameBlur}
+                onKeyDown={handleKeyDown}
+                className={
+                  "connect-wallet-input" +
+                  (touched && usernameError ? " input-error" : "") +
+                  (touched && !usernameError && username ? " input-valid" : "")
+                }
+              />
+              {touched && usernameError && (
+                <span className="field-error">{usernameError}</span>
+              )}
+              <span className="field-hint">
+                {username.length}/{USERNAME_MAX}
+              </span>
+            </div>
             <button
-              onClick={handleConnect}
-              disabled={!username.trim()}
+              onClick={() => enterGame(address)}
+              disabled={!isUsernameValid || loading}
               className="connect-wallet-button"
             >
               Enter Game
+            </button>
+            <button
+              onClick={handleDisconnect}
+              className="connect-wallet-disconnect"
+            >
+              Disconnect Wallet
             </button>
           </div>
         )}
 
         {error && <p className="connect-wallet-error">{error}</p>}
-
         {!socket?.connected && (
           <p className="connect-wallet-warning">Connecting to server...</p>
         )}

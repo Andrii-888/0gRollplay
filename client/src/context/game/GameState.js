@@ -1,5 +1,4 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   CS_CALL,
   CS_CHECK,
@@ -19,7 +18,6 @@ import GameContext from "./gameContext";
 
 const GameState = ({ children }) => {
   const { socket } = useContext(socketContext);
-  const navigate = useNavigate();
 
   const [messages, setMessages] = useState([]);
   const [currentTable, setCurrentTable] = useState(null);
@@ -33,6 +31,7 @@ const GameState = ({ children }) => {
     currentTableRef.current = currentTable;
 
     seatId &&
+      currentTable &&
       currentTable.seats[seatId] &&
       turn !== currentTable.seats[seatId].turn &&
       setTurn(currentTable.seats[seatId].turn);
@@ -69,8 +68,12 @@ const GameState = ({ children }) => {
 
       socket.on(SC_TABLE_LEFT, ({ tables, tableId }) => {
         console.log(SC_TABLE_LEFT, { tables, tableId });
-        setCurrentTable(null);
-        setMessages([]);
+        try {
+          setCurrentTable(null);
+          setMessages([]);
+        } catch (e) {
+          console.log("Table left cleanup:", e);
+        }
       });
     }
     if (socket) {
@@ -85,12 +88,11 @@ const GameState = ({ children }) => {
   };
 
   const leaveTable = () => {
+    if (!currentTableRef || !currentTableRef.current) return;
     standUp();
-    currentTableRef &&
-      currentTableRef.current &&
+    currentTableRef.current &&
       currentTableRef.current.id &&
       socket.emit(CS_LEAVE_TABLE, currentTableRef.current.id);
-    navigate("/");
   };
 
   const sitDown = (tableId, seatId, amount) => {

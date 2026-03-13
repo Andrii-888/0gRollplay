@@ -1,18 +1,15 @@
-import React, { useContext, useEffect } from 'react';
-import Container from '../components/layout/Container';
-import Heading from '../components/typography/Heading';
-import PropTypes from 'prop-types';
-import ColoredText from '../components/typography/ColoredText';
-import jackImg from '../assets/img/jack-rounded-img@2x.png';
-import kingImg from '../assets/img/king-rounded-img@2x.png';
-import queenImg from '../assets/img/queen-rounded-img@2x.png';
-import queen2Img from '../assets/img/queen2-rounded-img@2x.png';
-import styled from 'styled-components';
-import Text from '../components/typography/Text';
-import { useNavigate } from 'react-router-dom';
-import useScrollToTopOnPageLoad from '../hooks/useScrollToTopOnPageLoad';
-import globalContext from '../context/global/globalContext';
-import modalContext from '../context/modal/modalContext';
+import React, { useContext } from "react";
+import Container from "../components/layout/Container";
+import Heading from "../components/typography/Heading";
+import PropTypes from "prop-types";
+import ColoredText from "../components/typography/ColoredText";
+import jackImg from "../assets/img/jack-rounded-img@2x.png";
+import kingImg from "../assets/img/king-rounded-img@2x.png";
+import queenImg from "../assets/img/queen-rounded-img@2x.png";
+import queen2Img from "../assets/img/queen2-rounded-img@2x.png";
+import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
+import globalContext from "../context/global/globalContext";
 
 const WelcomeHeading = styled(Heading)`
   @media screen and (min-width: 468px) and (min-height: 600px) {
@@ -112,15 +109,19 @@ const MainMenuCard = styled.div`
   }
 `;
 
+const ComingSoon = styled.span`
+  color: #00ffff;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 0.5rem;
+  opacity: 0.7;
+`;
+
 const MainPage = ({ history }) => {
   const { userName } = useContext(globalContext);
-   
-  const { openModal } = useContext(modalContext);
-  const navigate = useNavigate()
 
-  useEffect(()=>{
-  },[])
-  useScrollToTopOnPageLoad();
+  const navigate = useNavigate();
 
   return (
     <Container
@@ -135,41 +136,41 @@ const MainPage = ({ history }) => {
         <ColoredText> {userName}!</ColoredText>
       </WelcomeHeading>
       <MainMenuWrapper>
-        <MainMenuCard onClick={() => navigate('/play')}>
+        <MainMenuCard onClick={() => navigate("/wallet")}>
           <img src={kingImg} alt="Join Table" />
           <Heading as="h3" headingClass="h5" textCentered>
-            JOIN TABLE
-          </Heading>
-        </MainMenuCard>
-        <MainMenuCard onClick={() => navigate('/play')}>
-          <img src={queen2Img} alt="Quick Game" />
-          <Heading as="h3" headingClass="h5" textCentered>
-            QUICK GAME
+            POKER
           </Heading>
         </MainMenuCard>
         <MainMenuCard
-          onClick={() => {
-            openModal(
-              () => (
-                <Text textAlign="center">
-                  Modal Text
-                </Text>
-              ),
-              "heading",
-              "button",
-            );
-          }}
+          style={{ opacity: 0.5, cursor: "default" }}
+          onClick={() => alert("Coming Soon")}
         >
-          <img src={jackImg} alt="Shop" />
+          <img src={queen2Img} alt="Blackjack" />
           <Heading as="h3" headingClass="h5" textCentered>
-            SHOP
+            BLACKJACK
           </Heading>
+          <ComingSoon>Coming Soon</ComingSoon>
         </MainMenuCard>
-        <MainMenuCard onClick={() => navigate('/game-rules')}>
-          <img src={queenImg} alt="Rules" />
+        <MainMenuCard
+          style={{ opacity: 0.5, cursor: "default" }}
+          onClick={() => alert("Coming Soon")}
+        >
+          <img src={jackImg} alt="Roulette" />
           <Heading as="h3" headingClass="h5" textCentered>
-            RULES
+            ROULETTE
           </Heading>
+          <ComingSoon>Coming Soon</ComingSoon>
+        </MainMenuCard>
+        <MainMenuCard
+          style={{ opacity: 0.5, cursor: "default" }}
+          onClick={() => alert("Coming Soon")}
+        >
+          <img src={queenImg} alt="Slots" />
+          <Heading as="h3" headingClass="h5" textCentered>
+            SLOTS
+          </Heading>
+          <ComingSoon>Coming Soon</ComingSoon>
         </MainMenuCard>
       </MainMenuWrapper>
     </Container>

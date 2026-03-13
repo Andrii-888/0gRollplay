@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   CS_CALL,
   CS_CHECK,
@@ -18,6 +19,7 @@ import GameContext from "./gameContext";
 
 const GameState = ({ children }) => {
   const { socket } = useContext(socketContext);
+  const navigate = useNavigate();
 
   const [messages, setMessages] = useState([]);
   const [currentTable, setCurrentTable] = useState(null);
@@ -93,6 +95,9 @@ const GameState = ({ children }) => {
     currentTableRef.current &&
       currentTableRef.current.id &&
       socket.emit(CS_LEAVE_TABLE, currentTableRef.current.id);
+    try {
+      navigate("/menu");
+    } catch (e) {}
   };
 
   const sitDown = (tableId, seatId, amount) => {

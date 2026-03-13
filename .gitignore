@@ -14,7 +14,7 @@ nohup.out
 
 # Env files
 server/test.env
-# .env
+.env
 
 # Optional caches
 .cache/
